@@ -1,0 +1,10 @@
+dependencies{
+     // orm
+    if(env == 'dev')
+        compile project(':jkmvc-orm')
+    else
+        compile "net.jkcode.jkmvc:jkmvc-orm:$jkmvc_version"
+
+    // jdbc
+    runtime "mysql:mysql-connector-java:5.1.6"
+}

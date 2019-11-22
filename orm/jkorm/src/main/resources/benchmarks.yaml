@@ -1,0 +1,13 @@
+# 动作: native/db/orm/query/queryReuse/queryCompiled
+action:
+  - native
+  - db
+  - orm
+  - query
+  - queryReuse
+  - queryCompiled
+# 请求数
+requests:
+  - 10000
+  - 50000
+  - 100000

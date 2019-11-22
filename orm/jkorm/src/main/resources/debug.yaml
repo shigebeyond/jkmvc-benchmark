@@ -1,0 +1,4 @@
+# 是否运行benchmarks.yaml 所有场景的性能测试, 否则运行benchmark.yaml 单一场景的性能测试
+all: true
+# 每个场景的测试次数, 仅在 all=true 时有效
+roundCount: 5
