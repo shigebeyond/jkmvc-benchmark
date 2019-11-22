@@ -42,7 +42,7 @@
 
 ```
     /**
-     * 原生 + sql
+     * 原生 | sql
      */
     public fun getMessageByNative(id: Int): MessageEntity?{
         return Db.instance().conn.queryResult("select * from message where id = $id", emptyList()) { rs ->
@@ -59,7 +59,7 @@
     }
 
     /**
-     * db + sql
+     * db | sql
      */
     public fun getMessageByDb(id: Int): MessageEntity?{
         return Db.instance().queryRow("select * from message where id = $id", emptyList()) { row ->
@@ -153,11 +153,7 @@
 | queryReuse    |    100000 |          6549.95 |  15267.28 |                   0.07 |
 | queryCompiled |    100000 |          5314.00 |  18818.22 |                   0.05 |
 
-### 测试脚本跑在另外一台机器
-
-
-
-### 结论
+=> 结论
 
 直接看请求数据为 10w 的结果, 性能比较为:
 
@@ -166,3 +162,28 @@ native > db > queryCompiled > queryReuse > query > orm
 其中 native / db / queryCompiled 性能比较接近, 是性能最好的
 
 其中 queryCompiled 最好时 tps 为2w, 响应时间为 0.05 ms
+
+### 附: mysql跑在当前机器, 测试脚本跑在另外一台机器
+
+| 测试场景      | 请求数    | 执行时间(ms)     | 平均tps   | 平均响应时间(ms)       |
+|---------------|-----------|------------------|-----------|------------------------|
+| native        |     10000 |          1376.62 |   7264.18 |                   0.14 |
+| db            |     10000 |          1347.01 |   7423.83 |                   0.13 |
+| orm           |     10000 |          1901.89 |   5257.92 |                   0.19 |
+| query         |     10000 |          1885.46 |   5303.74 |                   0.19 |
+| queryReuse    |     10000 |          1441.66 |   6936.47 |                   0.14 |
+| queryCompiled |     10000 |          1357.16 |   7368.32 |                   0.14 |
+| native        |     50000 |          6811.39 |   7340.65 |                   0.14 |
+| db            |     50000 |          6747.65 |   7409.99 |                   0.13 |
+| orm           |     50000 |          9496.13 |   5265.30 |                   0.19 |
+| query         |     50000 |          9478.73 |   5274.97 |                   0.19 |
+| queryReuse    |     50000 |          7187.33 |   6956.68 |                   0.14 |
+| queryCompiled |     50000 |          6784.60 |   7369.63 |                   0.14 |
+| native        |    100000 |         13669.10 |   7315.77 |                   0.14 |
+| db            |    100000 |         13488.98 |   7413.46 |                   0.13 |
+| orm           |    100000 |         19001.80 |   5262.66 |                   0.19 |
+| query         |    100000 |         18922.94 |   5284.59 |                   0.19 |
+| queryReuse    |    100000 |         14414.19 |   6937.61 |                   0.14 |
+| queryCompiled |    100000 |         13587.09 |   7359.93 |                   0.14 |
+
+=> 网络IO果然是大头

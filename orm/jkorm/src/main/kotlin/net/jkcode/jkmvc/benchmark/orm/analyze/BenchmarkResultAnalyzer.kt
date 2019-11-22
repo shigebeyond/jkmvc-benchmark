@@ -47,6 +47,7 @@ object BenchmarkResultAnalyzer {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        parseResultLog("/oldhome/shi/code/java/benchmark-log/jkorm")
+        //parseResultLog("/oldhome/shi/code/java/benchmark-log/jkorm")
+        parseResultLog("/oldhome/shi/code/java/benchmark-log/jkorm2")
     }
 }
