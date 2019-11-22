@@ -17,10 +17,10 @@
 
 ### 软件配置
 
-     mysql版本：
+     mysql版本： 做db server
      5.6.21
 
-     JDK版本：
+     JDK版本：做db client
      java version "1.8.0_172"
      Java(TM) SE Runtime Environment (build 1.8.0_172-b11)
      Java HotSpot(TM) 64-Bit Server VM (build 25.172-b11, mixed mode)
@@ -28,7 +28,7 @@
      JVM参数：
      java -Djava.net.preferIPv4Stack=true -server -Xms1g -Xmx1g -XX:PermSize=128m
 
-## 测试脚本
+## 测试脚本(db client)
 
 单线程同步调用, 请求数分别为1w/5w/10w的情况下，分别进行如下场景测试, 每种测试进行5轮, 最优结果(耗时最短)：
   - native: 使用原生jdbc来查询
@@ -130,7 +130,7 @@
 
 `select action as `测试场景`, requests as `请求数`, run_time as `执行时间(ms)`, tps as `平均tps`, rt as `平均响应时间(ms)` from orm_benchmark_result;`
 
-### mysql跟测试脚本跑在同一台机器
+### 场景1: db server/client跑在同一台机器
 
 | 测试场景      | 请求数    | 执行时间(ms)     | 平均tps   | 平均响应时间(ms)       |
 |---------------|-----------|------------------|-----------|------------------------|
@@ -153,7 +153,7 @@
 | queryReuse    |    100000 |          6549.95 |  15267.28 |                   0.07 |
 | queryCompiled |    100000 |          5314.00 |  18818.22 |                   0.05 |
 
-=> 结论
+### 结论
 
 直接看请求数据为 10w 的结果, 性能比较为:
 
@@ -161,9 +161,9 @@ native > db > queryCompiled > queryReuse > query > orm
 
 其中 native / db / queryCompiled 性能比较接近, 是性能最好的
 
-其中 queryCompiled 最好时 tps 为2w, 响应时间为 0.05 ms
+其中 queryCompiled 最好时 tps 为2w, 响应时间为 0.05 ms, 跟 native 是一个量级
 
-### 附: mysql跑在当前机器, 测试脚本跑在另外一台机器
+### 场景2: db server/client在不同机器
 
 | 测试场景      | 请求数    | 执行时间(ms)     | 平均tps   | 平均响应时间(ms)       |
 |---------------|-----------|------------------|-----------|------------------------|
@@ -186,4 +186,16 @@ native > db > queryCompiled > queryReuse > query > orm
 | queryReuse    |    100000 |         14414.19 |   6937.61 |                   0.14 |
 | queryCompiled |    100000 |         13587.09 |   7359.93 |                   0.14 |
 
-=> 网络IO果然是大头
+注:
+
+网络IO果然是大头, 不过该测试主要是针对各类 db client(原生jdbc/Db/DbQuery/Orm) 来进行性能测试, 主要目的是看jkmvc封装高级的 db client 跟原生jdbc的差距. 但如果网络IO占大头, 反而不容易评估各个 db client 的性能差异, 因此该测试结果没啥用
+
+两个结果一对比, 得到的各个阶段的时间有些冲突的, 但是注意的是场景1(一台机器), 还跑着其他服务, 这能解释时间冲突
+
+从场景2的响应时间可知: native=0.14ms, query=0.19ms, 也就是 query - native = 0.05ms, 就表示 query 比 native 多了 0.05ms 的运算, query 多出来的运算大多是生成sql的字符串运算
+
+代入到场景1: 由 native=0.05ms, 应该推到 query=0.10ms, 但实际是 query=0.16ms, 实际是 query 比 native 多了 0.11ms 的运算
+
+=> 由 db server的那台机器运行着较多进程(本身就是一个mysql server), 而 query 多运算, 属于计算密集型, 而较多进程导致进程切换, 从而导致 query 所分到的cpu时间少了, 导致 query 运算时间相对延长
+
+响应时间中, 网络耗时大概是 0.07ms
