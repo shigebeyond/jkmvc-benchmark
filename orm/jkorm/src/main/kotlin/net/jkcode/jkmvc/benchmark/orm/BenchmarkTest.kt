@@ -1,6 +1,5 @@
 package net.jkcode.jkmvc.benchmark.orm
 
-import net.jkcode.jkmvc.common.Config
 import net.jkcode.jkmvc.benchmark.orm.common.MessageEntity
 import net.jkcode.jkmvc.benchmark.orm.common.MessageModel
 import net.jkcode.jkmvc.db.Db
@@ -8,6 +7,7 @@ import net.jkcode.jkmvc.db.queryResult
 import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
+import net.jkcode.jkutil.common.Config
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat
 

@@ -1,6 +1,6 @@
 package net.jkcode.jkmvc.benchmark.orm
 
-import net.jkcode.jkmvc.common.Config
+import net.jkcode.jkutil.common.Config
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat
 
