@@ -14,7 +14,7 @@ object BenchmarkLauncher {
     /**
      * 调试的配置
      */
-    public val debugConfig: Config = Config.instance("debug", "yaml")
+    public val appConfig: Config = Config.instance("app", "yaml")
 
     /**
      * 所有场景测试的过程日志
@@ -54,7 +54,7 @@ object BenchmarkLauncher {
      * 运行性能测试
      */
     public fun runTest(){
-        if(debugConfig["all"]!!)
+        if(appConfig["all"]!!)
             runAllTest()
         else
             run1Test()
@@ -78,7 +78,7 @@ object BenchmarkLauncher {
             roundLogger.info("----------Benchmark Statistics--------------\n${config.props}\n")
             // 尝试多遍
             val results = ArrayList<BenchmarkResult>()
-            val roundCount: Int = debugConfig["roundCount"]!!
+            val roundCount: Int = appConfig["roundCount"]!!
             if(roundCount < 1)
                 throw Exception("配置项[roundCount]必须为正整数")
             for(i in 0 until roundCount) {
