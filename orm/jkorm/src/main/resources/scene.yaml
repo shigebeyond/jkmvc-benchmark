@@ -1,4 +1,8 @@
 # 动作: native/db/orm/query/queryReuse/queryCompiled
 action: native
+# 并发数
+concurrents: 1
 # 请求数
 requests: 10000
+# 是否异步
+async: false

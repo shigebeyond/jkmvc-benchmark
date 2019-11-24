@@ -1,5 +1,7 @@
-package net.jkcode.jkbenchmark.orm.orm
+package net.jkcode.jkbenchmark.orm
 
+import net.jkcode.jkbenchmark.BenchmarkApp
+import net.jkcode.jkbenchmark.IBenchmarkPlayer
 import net.jkcode.jkbenchmark.orm.orm.common.MessageEntity
 import net.jkcode.jkbenchmark.orm.orm.common.MessageModel
 import net.jkcode.jkmvc.db.Db
@@ -7,40 +9,35 @@ import net.jkcode.jkmvc.db.queryResult
 import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
-import net.jkcode.jkutil.common.Config
-import org.slf4j.LoggerFactory
-import java.text.MessageFormat
+import net.jkcode.jkutil.common.randomInt
 
 /**
- * 性能测试结果
- */
-class BenchmarkResult(
-        public val total: Int,
-        public val runTime: Double
-): Comparable<BenchmarkResult>{
-
-    override fun toString(): String {
-        return MessageFormat.format("RunTime: {0,number,#.##} ms, Avg TPS: {1,number,#.##}, Avg RT: {2,number,#.##} ms", runTime, total.toDouble() / runTime * 1000, runTime / total)
-    }
-
-    override fun compareTo(other: BenchmarkResult): Int {
-        return (this.runTime - other.runTime).toInt()
-    }
-}
-
-/**
- * orm性能测试
- *    纯sql vs orm : 执行10w次, 看执行时间差
+ * jkorm的玩家
  *
- *    纯sql: 22164.07 ms
- *    orm:  68296.76 ms
+ * @author shijianhang<772910474@qq.com>
+ * @date 2019-11-22 2:53 PM
  */
-class BenchmarkTest(public val config: Config){
+class JkormBenchmarkPlayer: IBenchmarkPlayer{
 
     /**
-     * 日志
+     * 玩家名
      */
-    public val logger = LoggerFactory.getLogger(this.javaClass)
+    override val name: String = "jkorm"
+
+    /**
+     * 获得同步动作
+     */
+    override fun getSyncAction(action: String): (Int) -> Any? {
+        return when(action){
+            "native"-> this::getMessageByNative
+            "db"-> this::getMessageByDb
+            "orm"-> this::getMessageByOrm
+            "query"-> this::getMessageByQuery
+            "queryReuse"-> this::getMessageByQueryReuse
+            "queryCompiled"-> this::getMessageByQueryCompiled
+            else -> throw Exception("不能识别action配置: " + action)
+        }
+    }
 
     /**
      * 原生 + sql
@@ -126,60 +123,4 @@ class BenchmarkTest(public val config: Config){
         }
     }
 
-    /**
-     * 执行测试
-     * @return 运行时间
-     */
-    private fun test(action: (Int)-> MessageEntity?): BenchmarkResult {
-        logger.info("Test ${config.props}")
-
-        // 热身
-        warmup(action)
-
-        // 正式测试
-        val start = System.nanoTime()
-        val requests: Int = config["requests"]!!
-        for(i in 0..requests) {
-            val msg = action.invoke(i % 10 + 1)
-        }
-        val runTime = System.nanoTime() - start
-        val runMs = runTime.toDouble() / 1000000L
-        val result = BenchmarkResult(requests, runMs)
-        logger.info("----------Benchmark Statistics--------------\n${config.props}\n$result\n")
-        return result
-    }
-
-    /**
-     * 热身
-     */
-    private fun warmup(action: (Int)-> MessageEntity?) {
-        val start = System.nanoTime()
-        for(i in 0..1000) {
-            val msg = action.invoke(i % 10 + 1)
-        }
-        val runTime = System.nanoTime() - start
-        val runMs = runTime.toDouble() / 1000000L
-        logger.info(MessageFormat.format("Warmup cost: {0,number,#.##} ms", runMs))
-    }
-
-    /**
-     * 运行测试场景
-     * @return 运行时间
-     */
-    public fun run(): BenchmarkResult {
-        val action: (Int)-> MessageEntity? = when(config.getString("action")!!){
-            "native"-> this::getMessageByNative
-            "db"-> this::getMessageByDb
-            "orm"-> this::getMessageByOrm
-            "query"-> this::getMessageByQuery
-            "queryReuse"-> this::getMessageByQueryReuse
-            "queryCompiled"-> this::getMessageByQueryCompiled
-            else -> throw Exception("不能识别action配置: " + config.getString("action"))
-        }
-
-        return test(action)
-    }
 }
-
-
-

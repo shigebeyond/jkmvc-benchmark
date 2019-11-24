@@ -1,9 +1,11 @@
 dependencies{
-     // orm
-    if(env == 'dev')
-        compile project(':jkmvc-orm')
-    else
-        compile "net.jkcode.jkmvc:jkmvc-orm:$jkmvc_version"
+    if(env == 'dev') { // 作为jksoa子模块
+        compile project(':jkbenchmark-test') // benchmark
+        compile project(':jkmvc-orm') // orm
+    }else {
+        compile "net.jkcode.jkbenchmark:jkbenchmark-test:$jkbenchmark_version" // benchmark
+        compile "net.jkcode.jkmvc:jkmvc-orm:$jkmvc_version" // orm
+    }
 
     // jdbc
     runtime "mysql:mysql-connector-java:5.1.6"
