@@ -1,7 +1,7 @@
-package net.jkcode.jkmvc.benchmark.orm
+package net.jkcode.jkbenchmark.orm.orm
 
-import net.jkcode.jkmvc.benchmark.orm.common.MessageEntity
-import net.jkcode.jkmvc.benchmark.orm.common.MessageModel
+import net.jkcode.jkbenchmark.orm.orm.common.MessageEntity
+import net.jkcode.jkbenchmark.orm.orm.common.MessageModel
 import net.jkcode.jkmvc.db.Db
 import net.jkcode.jkmvc.db.queryResult
 import net.jkcode.jkmvc.query.CompiledSql

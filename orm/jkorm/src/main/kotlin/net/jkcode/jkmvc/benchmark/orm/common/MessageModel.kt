@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.benchmark.orm.common
+package net.jkcode.jkbenchmark.orm.orm.common
 
 import net.jkcode.jkmvc.model.GeneralModel
 import net.jkcode.jkmvc.orm.IEntitiableOrm

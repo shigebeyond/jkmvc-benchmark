@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.benchmark.orm
+package net.jkcode.jkbenchmark.orm.orm
 
 import net.jkcode.jkutil.common.Config
 import org.slf4j.LoggerFactory
@@ -19,13 +19,13 @@ object BenchmarkLauncher {
     /**
      * 所有场景测试的过程日志
      */
-    public val roundLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.benchmark.round")
+    public val roundLogger = LoggerFactory.getLogger("net.jkcode.jkbenchmark.orm.round")
 
     /**
      * 所有场景测试的结果日志
      * 格式: 2019-11-20 17:00:28 [INFO] file-c10-n40000-syn | Runtime: 1431.09 ms, Avg TPS: 27950.64, Avg RT: 0.36ms
      */
-    public val resultLogger = LoggerFactory.getLogger("net.jkcode.jkmvc.benchmark.result")
+    public val resultLogger = LoggerFactory.getLogger("net.jkcode.jkbenchmark.orm.result")
 
     /**
      * 列出所有场景的配置

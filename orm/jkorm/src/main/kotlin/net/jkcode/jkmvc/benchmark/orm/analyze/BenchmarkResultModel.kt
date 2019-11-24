@@ -1,4 +1,4 @@
-package net.jkcode.jkmvc.benchmark.orm.analyze
+package net.jkcode.jkbenchmark.orm.orm.analyze
 
 import net.jkcode.jkmvc.orm.OrmMeta 
 import net.jkcode.jkmvc.orm.Orm 
