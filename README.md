@@ -128,7 +128,7 @@
 
 ## 测试结果
 
-`select action as `测试场景`, requests as `请求数`, run_time as `执行时间(ms)`, tps as `平均tps`, rt as `平均响应时间(ms)` from orm_benchmark_result;`
+`select action as `测试场景`, requests as `请求数`, run_time as `执行时间(ms)`, tps as `平均tps`, rt as `平均响应时间(ms)` from benchmark_result;`
 
 ### 场景1: db server/client跑在同一台机器
 
