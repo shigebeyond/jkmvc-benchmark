@@ -43,7 +43,7 @@ class JkormBenchmarkPlayer: IBenchmarkPlayer{
      * 原生 + sql
      */
     public fun getMessageByNative(id: Int): MessageEntity?{
-        return Db.instance().conn.queryResult("select * from message where id = $id", emptyList()) { rs ->
+        return Db.instance().conn.queryResult("select * from message where id = $id", emptyList<Any>()) { rs ->
             if(rs.next()) {
                 val msg = MessageEntity()
                 msg.id = rs.getInt("id")
@@ -60,7 +60,7 @@ class JkormBenchmarkPlayer: IBenchmarkPlayer{
      * db + sql
      */
     public fun getMessageByDb(id: Int): MessageEntity?{
-        return Db.instance().queryRow("select * from message where id = $id", emptyList()) { row ->
+        return Db.instance().queryRow("select * from message where id = $id", emptyList<Any>()) { row ->
             val msg = MessageEntity()
             msg.fromRow(row, true)
             msg
