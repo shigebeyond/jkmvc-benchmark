@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.jkcode.jkbenchmark.orm.mybatis.dao.DepartmentDao">
+
+    <insert id="addDep" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee" useGeneratedKeys="true" keyProperty="id">
+		insert into department(title,intro)
+		values(#{title},#{intro})
+	</insert>
+
+    <!-- Department getDepById(Integer id); -->
+    <select id="getDepById" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Department">
+        select *
+        from department
+        where id = #{id}
+    </select>
+
+    <!-- 部门联查员工, 用1条sql -->
+    <!-- Department getDepByIdWithEmps1sql(Integer id); -->
+    <resultMap id="depCascadeEmps1" type="net.jkcode.jkbenchmark.orm.mybatis.model.Department">
+        <!-- 设置主键映射 -->
+        <id column="id" property="id"/>
+        <!-- 普通字段映射 -->
+        <result column="title" property="title"/>
+        <result column="intro" property="intro"/>
+        <!-- 级联查询员工 -->
+        <collection property="emps" ofType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+            <!-- 设置主键映射 -->
+            <id column="id" property="id"/>
+            <!-- 普通字段映射 -->
+            <result column="title" property="title"/>
+            <result column="email" property="email"/>
+            <result column="gender" property="gender"/>
+        </collection>
+    </resultMap>
+    <select id="getDepByIdWithEmps1sql" resultMap="depCascadeEmps1">
+        select *
+        from employee e,
+             department d
+        where d.id = #{id}
+          and e.dep_id = d.id
+    </select>
+
+    <!-- 部门联查员工, 用2条sql -->
+    <!-- Department getDepByIdWithEmps2sql(Integer id); -->
+    <resultMap id="depCascadeEmps2" type="net.jkcode.jkbenchmark.orm.mybatis.model.Department">
+        <!-- 设置主键映射 -->
+        <id column="id" property="id"/>
+        <!-- 普通字段映射 -->
+        <result column="title" property="title"/>
+        <result column="intro" property="intro"/>
+        <!-- 级联查询员工 -->
+        <collection property="emps"
+                    select="net.jkcode.jkbenchmark.orm.mybatis.dao.EmployeeDao.getEmpByDepId"
+                    column="id">
+        </collection>
+    </resultMap>
+    <select id="getDepByIdWithEmps2sql" resultMap="depCascadeEmps2">
+        select *
+        from department
+        where id = #{id}
+    </select>
+
+</mapper>

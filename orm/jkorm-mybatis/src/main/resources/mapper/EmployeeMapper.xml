@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.jkcode.jkbenchmark.orm.mybatis.dao.EmployeeDao">
+
+    <!-- *************** 简单增删改查 *************** -->
+    <!-- Long addEmp(Employee emp); -->
+    <insert id="addEmp" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee" useGeneratedKeys="true" keyProperty="id">
+		insert into employee(title,email,gender)
+		values(#{title},#{email},#{gender})
+	</insert>
+
+    <!-- List<Employee> getAllEmps(); -->
+    <select id="getAllEmps" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+		select * from employee
+	</select>
+
+    <!-- Employee getEmpById(Integer id); -->
+    <select id="getEmpById" parameterType="int" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+		select * from employee where id = #{id}
+	</select>
+
+    <!-- Long updateEmp(Employee emp); -->
+    <update id="updateEmp">
+		update employee
+		set title=#{title}, email=#{email}, gender=#{gender}
+		where id=#{id}
+	</update>
+
+    <!-- Long delEmpById(Integer id); -->
+    <delete id="delEmpById">
+		delete from employee where id=#{id}
+	</delete>
+
+    <!-- *************** 员工联查部门 *************** -->
+    <!-- Employee getEmpByIdWithDep(Integer id); -->
+    <resultMap id="empCascadeDep2" type="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+        <!-- 设置主键映射 -->
+        <id column="id" property="id"/>
+        <!-- 普通字段映射 -->
+        <result column="title" property="title"/>
+        <result column="email" property="email"/>
+        <result column="gender" property="gender"/>
+        <!-- 级联查询部门 -->
+        <association property="dep">
+            <!-- 设置主键映射 -->
+            <id column="dep_id" property="id"/>
+            <!-- 普通字段映射 -->
+            <result column="dep_title" property="title"/>
+            <result column="dep_intro" property="intro"/>
+        </association>
+    </resultMap>
+    <select id="getEmpByIdWithDep" resultMap="empCascadeDep2">
+		select *
+		from employee e, department d
+		where e.id = #{id}
+		and e.dep_id = d.id
+	</select>
+
+    <!-- *************** 根据部门id查员工 *************** -->
+    <!-- Employee getEmpByDepId(Integer depId); -->
+    <select id="getEmpByDepId" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+	    select * from employee where dep_id = #{depId}
+    </select>
+
+    <!-- *************** 多个条件查询 *************** -->
+    <!-- List<Employee> getEmpsByConditionIf(Employee emp); -->
+    <select id="getEmpsByConditionIf" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+        select * from employee
+        <where>
+            <if test="id!=null">
+                and id = #{id}
+            </if>
+            <if test="title!=null">
+                and title like #{title}
+            </if>
+            <if test="email!=null">
+                and email like #{email}
+            </if>
+            <if test="gender!=null">
+                and gender like #{gender}
+            </if>
+            <if test="dep!=null">
+                and dep_id = #{dep.id}
+            </if>
+        </where>
+        order by id desc
+        LIMIT #{offSet},#{limit};
+    </select>
+
+    <!-- *************** 更新动态字段 *************** -->
+    <!-- boolean updateEmpOnDynFields(Employee emp); -->
+    <update id="updateEmpOnDynFields">
+        update employee
+        <!--
+        trim：
+            prefix：给拼串后的整个字符串加一个前缀
+            prefixOverrides：去掉整个字符串前面多余的字符，支持或（|）
+            suffix：给拼串后的整个字符串加一个后缀
+            suffixOverrides：去掉整个字符串后面多余的字符，支持或（|）
+        -->
+        <trim prefix="set" suffixOverrides=",">
+            <if test="title!=null">
+                title = #{title},
+            </if>
+            <if test="email!=null">
+                email = #{email},
+            </if>
+            <if test="gender!=null">
+                gender = #{gender},
+            </if>
+            <if test="dep!=null">
+                dep_id = #{dep.id},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- *************** 单个动态条件查询 *************** -->
+    <!-- List<Employee> getEmpsByConditionChoose(Employee emp); -->
+    <select id="getEmpsByConditionChoose" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+        select * from employee
+        <where>
+            <choose>
+                <when test="id!=null">
+                    id = #{id}
+                </when>
+                <when test="title!=null">
+                    title = #{title}
+                </when>
+                <when test="email!=null">
+                    email = #{email}
+                </when>
+                <otherwise>
+                    gender = '女'
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <!-- *************** 多id查询(循环多id拼where in) *************** -->
+    <!-- List<Employee> getEmpsByConditionForeach(@Param("ids") List<Integer> ids); -->
+    <select id="getEmpsByConditionForeach" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+        select * from employee
+        <!--
+            foreach：
+                collection：指定要遍历的集合（list类型的参数会特殊处理封装在map中，map的key就叫list）
+                item：将当前遍历出的元素赋值给指定的变量
+                separator：每个元素之间的分隔符
+                open：遍历出所有结果拼接一个开始的字符串
+                close：遍历出所有结果拼接一个结束的字符串
+                index：遍历list的时候，index就是索引，item就是当前值
+                       遍历map的时候，index就是map的key，item就是map[key]的值
+
+            #{变量名}就能取出变量的值也就是当前遍历出的元素
+         -->
+        <foreach collection="ids" item="id" separator="," open="where id in(" close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- *************** 批量插入 *************** -->
+    <!-- void addEmps(@Param("emps") List<Employee> emps); -->
+    <insert id="addEmps">
+        insert into employee (title, email, gender, dep_id)
+        values
+        <foreach collection="emps" item="emp" separator=",">
+            (#{emp.title}, #{emp.email}, #{emp.gender}, #{emp.dep.id})
+        </foreach>
+    </insert>
+
+    <!-- *************** 通过定义变量, 来修正参数值 *************** -->
+    <!-- List<Employee> getEmpsByInnerParameter(String title); -->
+    <select id="getEmpsByInnerParameter" resultType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee">
+        <bind name="_title" value="'%'+title+'%'"/>
+        select * from employee
+        <if test="_parameter!=null">
+            <!-- 使用bind绑定的变量_title -->
+            where title like #{_title}
+        </if>
+    </select>
+
+</mapper>

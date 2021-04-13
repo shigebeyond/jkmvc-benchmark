@@ -1,3 +1,36 @@
 rootProject.name = 'jkmvc-benchmark'
 
-include 'orm:jkorm', 'http:jkhttp'
+// 添加子项目
+if(env == 'dev') {
+    // jkutil
+    include 'jkutil'
+    project(':jkutil').projectDir = new File('../jkutil')
+
+    // 应用守护
+    include 'jkguard'
+    project(':jkguard').projectDir = new File('../jkguard')
+
+    // orm
+    include 'jkmvc-orm'
+    project(':jkmvc-orm').projectDir = new File('../jkmvc/jkmvc-orm')
+
+    // mvc
+    include 'jkmvc-http'
+    project(':jkmvc-http').projectDir = new File('../jkmvc/jkmvc-http')
+
+    // orm
+    include 'jkmvc-server-jetty'
+    project(':jkmvc-server-jetty').projectDir = new File('../jkmvc/jkmvc-server-jetty')
+
+    // 性能测试
+    include 'jkbenchmark-test'
+    project(':jkbenchmark-test').projectDir = new File('../jkbenchmark/jkbenchmark-test')
+
+    include 'orm-benchmark'
+    project(':orm-benchmark').projectDir = new File('../jkmvc-benchmark/orm/jkorm')
+
+    include 'http-benchmark'
+    project(':http-benchmark').projectDir = new File('../jkmvc-benchmark/http/jkhttp')
+}
+
+include 'orm:jkorm', 'orm:jkorm-mybatis', 'http:jkhttp'

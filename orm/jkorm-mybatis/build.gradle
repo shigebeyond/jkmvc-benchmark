@@ -1,0 +1,16 @@
+dependencies{
+    if(env == 'dev') { // 作为jksoa子模块
+        compile project(':jkbenchmark-test') // benchmark
+        compile project(':jkmvc-orm') // orm
+    }else {
+        compile "net.jkcode.jkbenchmark:jkbenchmark-test:$jkbenchmark_version" // benchmark
+        compile "net.jkcode.jkmvc:jkmvc-orm:$jkmvc_version" // orm
+    }
+
+    // mybatis
+    compile 'org.mybatis:mybatis:3.5.6'
+
+    // jdbc
+    runtime "mysql:mysql-connector-java:5.1.6"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
