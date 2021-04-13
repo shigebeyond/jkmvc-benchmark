@@ -1,6 +1,7 @@
 package net.jkcode.jkbenchmark.orm.mybatis
 
 import net.jkcode.jkbenchmark.IBenchmarkPlayer
+import net.jkcode.jkbenchmark.orm.Const
 import net.jkcode.jkbenchmark.orm.mybatis.dao.DepartmentDao
 import net.jkcode.jkbenchmark.orm.mybatis.dao.EmployeeDao
 import net.jkcode.jkbenchmark.orm.mybatis.model.Department
@@ -37,19 +38,6 @@ class MybatisBenchmarkPlayer: IBenchmarkPlayer{
     val depDao: DepartmentDao = session.getMapper(DepartmentDao::class.java)
     val empDao: EmployeeDao = session.getMapper(EmployeeDao::class.java)
 
-    companion object{
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val player = MybatisBenchmarkPlayer()
-            val action = "update"
-            val f = player.getSyncAction(action)
-            val start = System.currentTimeMillis()
-            f(0)
-            val costtime = System.currentTimeMillis() - start
-            println("执行[$action]动作耗时: " + costtime + " ms")
-        }
-    }
-
     /**
      * 获得同步动作
      */
@@ -58,7 +46,7 @@ class MybatisBenchmarkPlayer: IBenchmarkPlayer{
             "add"-> this::add
             "update"-> this::update
             "delete"-> this::delete
-            "getDepWithEmp"-> this::getDepWithEmp
+            "getDepWithEmps"-> this::getDepWithEmps
             "getEmpsByConditionIf"-> this::getEmpsByConditionIf
             "updateEmpOnDynFields"-> this::updateEmpOnDynFields
             "getEmpsByIds"-> this::getEmpsByIds
@@ -70,71 +58,80 @@ class MybatisBenchmarkPlayer: IBenchmarkPlayer{
      * 新增
      *   100个部门+1000个员工
      */
-    public fun add(i: Int){
+    public fun add(i: Int): Int {
         // 清空表
         Db.instance().execute(" truncate table department")
         Db.instance().execute(" truncate table employee")
 
-        for(i in 1..100) {
+        var id = 1
+        for(i in 1..Const.addNum) {
             // 新增部门
             val dep = Department(i, "部" + i, "")
             depDao.addDep(dep)
 
             // 新增员工
-            for(j in 1..10) {
+            for(j in 1..3) {
                 val isMan = randomBoolean()
                 val title = (if(isMan) "Mr " else "Miss ") + randomString(5);
                 val gender = if(isMan) "男" else "女";
-                val emp = Employee((i-1)*100+j, title, "$title@qq.com", gender, dep);
+                val emp = Employee(id++, title, "$title@qq.com", gender, dep);
                 empDao.addEmp(emp)
             }
         }
 
         session.commit()
+
+        return Const.addNum
     }
 
     /**
      * 更新
      *   1000次
      */
-    public fun update(i: Int){
-        for(i in 1..1000) {
+    public fun update(i: Int): Int {
+        for(i in 1..Const.updateNum) {
             val emp: Employee = empDao.getEmpById(i);
             val isMan = emp.gender == "男"
             emp.title = (if (isMan) "Mr " else "Miss ") + randomString(5);
             empDao.updateEmp(emp)
         }
         session.commit()
+
+        return Const.updateNum
     }
 
     /**
      * 删除
      *    1000次
      */
-    public fun delete(i: Int){
-        for(i in 1..1000) {
+    public fun delete(i: Int): Int {
+        for(i in 1..Const.delNum) {
             // 先查后删
             val emp = empDao.getEmpById(i)
             if(emp != null)
                 empDao.delEmpById(i);
         }
         session.commit()
+
+        return Const.delNum
     }
 
     /**
      * 部门联查员工
      */
-    public fun getDepWithEmp(i: Int){
-        for(i in 1..100) {
+    public fun getDepWithEmps(i: Int): Int {
+        for(i in 1..Const.withManyNum) {
             depDao.getDepByIdWithEmps2sql(i)
         }
+
+        return Const.withManyNum
     }
 
     /**
      * 条件查询
      */
-    public fun getEmpsByConditionIf(i: Int){
-        for(i in 1..100) {
+    public fun getEmpsByConditionIf(i: Int): Int {
+        for(i in 1..Const.conditionNum) {
             val emp = Employee()
             if (i % 2 == 1)
                 emp.id = randomInt(1000)
@@ -142,13 +139,15 @@ class MybatisBenchmarkPlayer: IBenchmarkPlayer{
                 emp.gender = if (randomBoolean()) "男" else "女"
             val emps = empDao.getEmpsByConditionIf(emp, 0, 10)
         }
+
+        return Const.conditionNum
     }
 
     /**
      * 更新动态字段
      */
-    public fun updateEmpOnDynFields(i: Int){
-        for(i in 1..100) {
+    public fun updateEmpOnDynFields(i: Int): Int {
+        for(i in 1..Const.updateDynNum) {
             // 先查后改
             val emp0 = empDao.getEmpById(i)
             if(emp0 == null){
@@ -168,16 +167,20 @@ class MybatisBenchmarkPlayer: IBenchmarkPlayer{
             empDao.updateEmpOnDynFields(emp)
         }
         session.commit()
+
+        return Const.updateDynNum
     }
 
     /**
      * 多id查询(循环多id拼where in)
      */
-    public fun getEmpsByIds(i: Int){
-        for(i in 1..100) {
+    public fun getEmpsByIds(i: Int): Int {
+        for(i in 1..Const.idsNum) {
             val ids = listOf(randomInt(1000), randomInt(1000), randomInt(1000))
             val emps = empDao.getEmpsByConditionForeach(ids)
         }
+
+        return Const.idsNum
     }
 
 }

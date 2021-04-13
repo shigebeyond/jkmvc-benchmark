@@ -3,7 +3,7 @@ action:
   - add
   - update
   - delete
-  - getDepWithEmp
+  - getDepWithEmps
   - getEmpsByConditionIf
   - updateEmpOnDynFields
   - getEmpsByIds
