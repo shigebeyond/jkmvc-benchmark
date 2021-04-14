@@ -1,8 +1,8 @@
-# 动作: native/db/orm/query/queryReuse/queryCompiled
-action: native
+# 动作: add/update/delete/getDepWithEmps/getEmpsByConditionIf/updateEmpOnDynFields/getEmpsByIds
+action: getEmpsByConditionIf
 # 并发数
 concurrents: 1
 # 请求数
-requests: 10000
+requests: 100
 # 是否异步
 async: false

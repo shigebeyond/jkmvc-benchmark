@@ -60,11 +60,9 @@ public interface EmployeeDao {
     /**
      * 条件查询
      * @param emp
-     * @param offSet
-     * @param limit
      * @return
      */
-    List<Employee> getEmpsByConditionIf(Employee emp, int offSet, int limit);
+    List<Employee> getEmpsByConditionIf(Employee emp);
 
     /**
      * 更新动态字段

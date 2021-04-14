@@ -1,4 +1,4 @@
-# 动作: native/db/orm/query/queryReuse/queryCompiled
+# 动作: add/update/delete/getDepWithEmps/getEmpsByConditionIf/updateEmpOnDynFields/getEmpsByIds
 action:
   - add
   - update

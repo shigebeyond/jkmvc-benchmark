@@ -31,12 +31,16 @@ class VsTests {
                 Db.instance().execute("truncate table department")
             }
 
-            val f = player.getSyncAction(action)
             val start = System.currentTimeMillis()
-            val num = f(0) as Int // 结果是db操作次数
+
+            for(i in 1..10000) {
+                val f = player.getSyncAction(action)
+                val num = f(0) as Int // 结果是db操作次数
+                total += num
+            }
+
             val costtime = System.currentTimeMillis() - start
             alltime += costtime
-            total += num
             println("第${i}次执行[$action]动作耗时: " + costtime + " ms")
 
             if(action == "delete"){

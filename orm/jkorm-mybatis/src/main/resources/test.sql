@@ -17,3 +17,6 @@ CREATE TABLE `employee` (
     `dep_id` int(11) NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `employee2`;
+CREATE TABLE `employee2` like `employee`;

@@ -79,14 +79,14 @@
                 and email like #{email}
             </if>
             <if test="gender!=null">
-                and gender like #{gender}
+                and gender = #{gender}
             </if>
             <if test="dep!=null">
                 and dep_id = #{dep.id}
             </if>
         </where>
         order by id desc
-        LIMIT #{offSet},#{limit};
+        LIMIT 0,10;
     </select>
 
     <!-- *************** 更新动态字段 *************** -->

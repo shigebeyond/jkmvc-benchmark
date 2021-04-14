@@ -103,8 +103,8 @@ subprojects{
     task copyStartSh(type: Copy) {
         into "${buildDir}/${project.name}"
 		from "start.sh"
-        from "start-server.sh"
-        from "start-client.sh"
+        from "start-jkorm.sh"
+        from "start-mybatis.sh"
     }
 
     // 复制配置文件
