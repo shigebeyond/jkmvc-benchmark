@@ -14,7 +14,6 @@ concurrents:
 requests:
   - 10000
   - 50000
-  - 100000
 # 是否异步
 async:
   - false # 无异步

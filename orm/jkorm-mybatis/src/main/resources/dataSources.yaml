@@ -4,18 +4,20 @@ default:
   # 主库
   master:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.0.17/test?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
     username: root
-#    password: root
-    password: '123456'
+    password: root
+    idleTimeout: !!java.lang.Long 1800000
+    maxPoolSize: 20
   # 多个从库, 可省略
   slaves:
     -
       driverClassName: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.0.17/test?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://127.0.0.1/test?useUnicode=true&characterEncoding=utf-8
       username: root
-#      password: root
-      password: '123456'
+      password: root
+      idleTimeout: !!java.lang.Long 1800000
+      maxPoolSize: 20
 
 # sql server, 命名: 小写+下划线
 #default:
@@ -29,8 +31,8 @@ default:
 #default:
 #  master:
 #    driverClassName: oracle.jdbc.driver.OracleDriver
-#    url: jdbc:oracle:thin:@192.168.0.17:ORCL
-#    # schema - oracle的概念，代表一组数据库对象，在 Db.tableColumns 中延迟加载表字段时，用来过滤 DYPT 库的表，可省略，默认值=username
+#    url: jdbc:oracle:thin:@127.0.0.1:ORCL
+#    # schema - oracle的概念，代表一组数据库对象，在 Db.tables 中延迟加载表字段时，用来过滤 DYPT 库的表，可省略，默认值=username
 #    # schema: admin
 #    username: admin
 #    password: 123456

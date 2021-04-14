@@ -15,6 +15,7 @@ CREATE TABLE `employee` (
     `email` varchar(50) NOT NULL,
     `gender` char(1) NOT NULL,
     `dep_id` int(11) NOT NULL DEFAULT 0,
+    KEY `idx_dep_id` (`dep_id`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

@@ -1,5 +1,5 @@
 # 动作: add/update/delete/getDepWithEmps/getEmpsByConditionIf/updateEmpOnDynFields/getEmpsByIds
-action: getEmpsByConditionIf
+action: getDepWithEmps
 # 并发数
 concurrents: 1
 # 请求数
