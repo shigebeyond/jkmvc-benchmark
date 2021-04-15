@@ -11,4 +11,4 @@ deploy()
 	scp *.zip root@$test:/root/java/benchmark
 }
 
-deploy jkorm
+deploy jkorm-jdbc

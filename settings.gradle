@@ -33,4 +33,4 @@ if(env == 'dev') {
     project(':http-benchmark').projectDir = new File('../jkmvc-benchmark/http/jkhttp')
 }
 
-include 'orm:jkorm', 'orm:jkorm-mybatis', 'http:jkhttp'
+include 'orm:jkorm-jdbc', 'orm:jkorm-mybatis', 'http:jkhttp'
