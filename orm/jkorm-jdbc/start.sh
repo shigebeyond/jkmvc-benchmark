@@ -15,6 +15,6 @@ if [ "$1" = "debug" ]; then
     JAVA_DEBUG_OPTS=" -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=n "
 fi
 
-CLIENT_CLASS='net.jkcode.jkbenchmark.orm.JkormBenchmarkPlayer'
+CLIENT_CLASS='net.jkcode.jkbenchmark.orm.JkormJdbcBenchmarkPlayer'
 
 java $JAVA_OPTS $JAVA_DEBUG_OPTS -cp $DIR/conf:$DIR/libs/* net.jkcode.jkbenchmark.BenchmarkApp $CLIENT_CLASS

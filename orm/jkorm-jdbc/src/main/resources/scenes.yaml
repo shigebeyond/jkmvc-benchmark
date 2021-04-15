@@ -1,11 +1,12 @@
-# 动作: native/db/orm/query/queryReuse/queryCompiled
+# 动作: native/db/orm/ormpk/query/queryReuse/queryCompiled
 action:
   - native
   - db
   - orm
-  - query
-  - queryReuse
-  - queryCompiled
+  - ormpk
+#  - query
+#  - queryReuse
+#  - queryCompiled
 # 并发数
 concurrents:
   - 1
@@ -13,7 +14,7 @@ concurrents:
 requests:
   - 10000
   - 50000
-  - 100000
+#  - 100000
 # 是否异步
 async:
   - false # 无异步

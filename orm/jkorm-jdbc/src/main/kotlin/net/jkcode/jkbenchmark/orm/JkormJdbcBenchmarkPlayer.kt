@@ -9,7 +9,7 @@ import net.jkcode.jkmvc.db.queryResult
 import net.jkcode.jkmvc.query.CompiledSql
 import net.jkcode.jkmvc.query.DbExpr
 import net.jkcode.jkmvc.query.DbQueryBuilder
-import net.jkcode.jkutil.common.randomInt
+import net.jkcode.jkutil.common.randomString
 
 /**
  * jkorm的玩家
@@ -17,12 +17,36 @@ import net.jkcode.jkutil.common.randomInt
  * @author shijianhang<772910474@qq.com>
  * @date 2019-11-22 2:53 PM
  */
-class JkormBenchmarkPlayer: IBenchmarkPlayer{
+class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
+
+    companion object{
+        @JvmStatic
+        fun main(args: Array<String>) {
+            // 运行app
+            val player = JkormJdbcBenchmarkPlayer()
+            BenchmarkApp(player).run()
+        }
+    }
 
     /**
      * 玩家名
      */
     override val name: String = "jkorm"
+
+    init {
+        val n = MessageModel.queryBuilder().count()
+        if(n == 0){
+            println("插入message表")
+            for (i in 1..50000){
+                val m = MessageModel()
+                m.id = i
+                m.fromUid = 1
+                m.toUid = 2
+                m.content = randomString(8)
+                m.create()
+            }
+        }
+    }
 
     /**
      * 获得同步动作
@@ -32,6 +56,7 @@ class JkormBenchmarkPlayer: IBenchmarkPlayer{
             "native"-> this::getMessageByNative
             "db"-> this::getMessageByDb
             "orm"-> this::getMessageByOrm
+            "ormpk"-> this::getMessageByOrmPK
             "query"-> this::getMessageByQuery
             "queryReuse"-> this::getMessageByQueryReuse
             "queryCompiled"-> this::getMessageByQueryCompiled
@@ -75,6 +100,13 @@ class JkormBenchmarkPlayer: IBenchmarkPlayer{
      */
     public fun getMessageByOrm(id: Int): MessageEntity?{
         return MessageModel.queryBuilder().where("id", "=", id).findEntity<MessageModel, MessageEntity>()
+    }
+
+    /**
+     * orm findByPk
+     */
+    public fun getMessageByOrmPK(id: Int): MessageEntity?{
+        return MessageModel.findByPk<MessageModel>(id)
     }
 
     /**

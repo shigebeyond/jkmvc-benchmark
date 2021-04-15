@@ -65,7 +65,6 @@ class MybatisBenchmarkPlayer : BaseBenchmarkPlayer {
 
     /**
      * 新增
-     *   100个部门+1000个员工
      */
     public fun add(i: Int): Int {
         // 新增部门
@@ -86,7 +85,6 @@ class MybatisBenchmarkPlayer : BaseBenchmarkPlayer {
 
     /**
      * 更新
-     *   1000次
      */
     public fun update(i: Int): Int {
         val emp: Employee = empDao.getEmpById(i);
@@ -100,7 +98,6 @@ class MybatisBenchmarkPlayer : BaseBenchmarkPlayer {
 
     /**
      * 删除
-     *    1000次
      */
     public fun delete(i: Int): Int {
         // 先查后删

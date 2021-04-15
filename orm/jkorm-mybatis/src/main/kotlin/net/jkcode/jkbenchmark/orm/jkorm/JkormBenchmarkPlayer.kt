@@ -48,7 +48,6 @@ class JkormBenchmarkPlayer : BaseBenchmarkPlayer {
 
     /**
      * 新增
-     *   100个部门+1000个员工
      */
     public fun add(i: Int): Int {
         Department.db.transaction {
@@ -77,20 +76,17 @@ class JkormBenchmarkPlayer : BaseBenchmarkPlayer {
 
     /**
      * 更新
-     *   1000次
      */
     public fun update(i: Int): Int {
         val emp = Employee.findByPk<Employee>(i)!!
         val isMan = emp.gender == "男"
-        val title = (if (isMan) "Mr " else "Miss ") + randomString(5)
-        emp.title = title;
+        emp.title =  (if (isMan) "Mr " else "Miss ") + randomString(5)
         emp.update()
         return 2
     }
 
     /**
      * 删除
-     *    1000次
      */
     public fun delete(i: Int): Int {
         val emp = Employee.findByPk<Employee>(i)
