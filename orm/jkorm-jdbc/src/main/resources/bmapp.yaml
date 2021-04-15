@@ -5,6 +5,6 @@ warmupRequests: 1000
 # 是否运行scenes.yaml 所有场景的性能测试, 否则运行scene.yaml 单一场景的性能测试
 all: true
 # 每个场景的测试次数, 仅在 all=true 时有效
-roundCount: 5
+roundCount: 3
 # 是否对每个请求打日志
 logEveryRequest: false

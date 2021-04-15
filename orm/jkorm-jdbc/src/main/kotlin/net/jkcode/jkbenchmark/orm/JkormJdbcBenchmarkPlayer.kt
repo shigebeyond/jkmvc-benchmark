@@ -33,11 +33,13 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      */
     override val name: String = "jkorm"
 
+    private val maxid = 10000
+
     init {
         val n = MessageModel.queryBuilder().count()
         if(n == 0){
-            println("插入message表")
-            for (i in 1..50000){
+            println("初始化message表--start")
+            for (i in 1..maxid){
                 val m = MessageModel()
                 m.id = i
                 m.fromUid = 1
@@ -45,6 +47,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
                 m.content = randomString(8)
                 m.create()
             }
+            println("初始化message表--end")
         }
     }
 
@@ -68,7 +71,8 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      * 原生 + sql
      */
     public fun getMessageByNative(id: Int): MessageEntity?{
-        return Db.instance().conn.queryResult("select * from message where id = $id", emptyList<Any>()) { rs ->
+        val id = id % maxid + 1
+        return Db.instance().conn.queryResult("select * from message where id = ?", listOf(id)) { rs ->
             if(rs.next()) {
                 val msg = MessageEntity()
                 msg.id = rs.getInt("id")
@@ -85,7 +89,8 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      * db + sql
      */
     public fun getMessageByDb(id: Int): MessageEntity?{
-        return Db.instance().queryRow("select * from message where id = $id", emptyList<Any>()) { row ->
+        val id = id % maxid + 1
+        return Db.instance().queryRow("select * from message where id = ?", listOf(id)) { row ->
             val msg = MessageEntity()
             msg.fromRow(row, true)
             msg
@@ -99,6 +104,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      * 其中 char是5w个(是纯sql的5倍), String
      */
     public fun getMessageByOrm(id: Int): MessageEntity?{
+        val id = id % maxid + 1
         return MessageModel.queryBuilder().where("id", "=", id).findEntity<MessageModel, MessageEntity>()
     }
 
@@ -106,6 +112,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      * orm findByPk
      */
     public fun getMessageByOrmPK(id: Int): MessageEntity?{
+        val id = id % maxid + 1
         return MessageModel.findByPk<MessageModel>(id)
     }
 
@@ -116,6 +123,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
      * findEntity() 跟 findRow{} 差不多
      */
     public fun getMessageByQuery(id: Int): MessageEntity?{
+        val id = id % maxid + 1
         return DbQueryBuilder().table("message").where("id", "=", id).findRow { row ->
             val msg = MessageEntity()
             msg.fromRow(row, true)
@@ -133,6 +141,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
         DbQueryBuilder()
     }
     public fun getMessageByQueryReuse(id: Int): MessageEntity?{
+        val id = id % maxid + 1
         query.clear()
         return query.table("message").where("id", "=", id).findRow { row ->
             val msg = MessageEntity()
@@ -148,6 +157,7 @@ class JkormJdbcBenchmarkPlayer: IBenchmarkPlayer{
         DbQueryBuilder().table("message").where("id", "=", DbExpr.question).compileSelectOne()
     }
     public fun getMessageByQueryCompiled(id: Int): MessageEntity?{
+        val id = id % maxid + 1
         return csql.findRow(listOf(id)) { row ->
             val msg = MessageEntity()
             msg.fromRow(row, true)
