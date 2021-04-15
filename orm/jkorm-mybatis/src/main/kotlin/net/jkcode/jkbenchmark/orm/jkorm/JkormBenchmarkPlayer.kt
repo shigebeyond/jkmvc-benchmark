@@ -104,11 +104,11 @@ class JkormBenchmarkPlayer : BaseBenchmarkPlayer {
      * 部门联查员工
      */
     public fun getDepWithEmps(i: Int): Int {
-        Department.queryBuilder()
-                .with("emps")
+        val dep = Department.queryBuilder()
                 .where("id", i)
-                .findModels<Department>()
+                .findModel<Department>()
 
+        val emps = dep?.emps
         return 2
     }
 

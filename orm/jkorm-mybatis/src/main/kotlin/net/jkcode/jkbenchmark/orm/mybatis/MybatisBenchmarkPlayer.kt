@@ -116,7 +116,8 @@ class MybatisBenchmarkPlayer : BaseBenchmarkPlayer {
      * 部门联查员工
      */
     public fun getDepWithEmps(i: Int): Int {
-        depDao.getDepByIdWithEmps2sql(i)
+        val dep = depDao.getDepByIdWithEmps2sql(i)
+        val emps = dep.emps
         return 2
     }
 
