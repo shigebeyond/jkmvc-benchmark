@@ -10,4 +10,4 @@ columnUnderlineDbs: default,test
 # Column name is all uppercase for these database names
 columnUpperCaseDbs:
 # 自定义db实现类 -- 使用 Hikari 连接池
-customDbClass: net.jkcode.jkmvc.db.single.HikariSingleDb
+#customDbClass: net.jkcode.jkmvc.db.single.HikariSingleDb
