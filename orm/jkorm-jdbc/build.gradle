@@ -3,7 +3,7 @@ dependencies{
         compile project(':jkbenchmark-test') // benchmark
         compile project(':jkmvc-orm') // orm
     }else {
-        compile "net.jkcode.jkmvc:jkbenchmark-test:$jkbenchmark_version" // benchmark
+        compile "net.jkcode:jkbenchmark-test:$jkbenchmark_version" // benchmark
         compile "net.jkcode.jkmvc:jkmvc-orm:$jkmvc_version" // orm
     }
 
