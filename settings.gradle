@@ -10,6 +10,10 @@ if(env == 'dev') {
     include 'jkguard'
     project(':jkguard').projectDir = new File('../jkguard')
 
+    // jphp扩展
+    include 'jphp-java-ext'
+    project(':jphp-java-ext').projectDir = new File('../jphp-java-ext')
+
     // orm
     include 'jkmvc-orm'
     project(':jkmvc-orm').projectDir = new File('../jkmvc/jkmvc-orm')
