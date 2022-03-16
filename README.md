@@ -1,8 +1,5 @@
-# 性能测试
-
-我分别针对 jkmvc 框架中的 orm 模块与 http 模块进行性能测试
-
-以下是我们测试的结果：
+# 一、性能测试: jkorm vs jdbc
+主要是对orm框架`jkorm`的查询处理进行性能测试，并与jdbc的查询处理做性能对比。
 
 ## 测试环境
 
@@ -199,3 +196,6 @@ native > db > queryCompiled > queryReuse > query > orm
 => 由 db server的那台机器运行着较多进程(本身就是一个mysql server), 而 query 多运算, 属于计算密集型, 而较多进程导致进程切换, 从而导致 query 所分到的cpu时间少了, 导致 query 运算时间相对延长
 
 响应时间中, 网络耗时大概是 0.07ms
+
+# 二、性能测试: jkorm vs mybatis
+主要是对2个orm框架`jkorm`与`mybatis`做性能测试与对比
