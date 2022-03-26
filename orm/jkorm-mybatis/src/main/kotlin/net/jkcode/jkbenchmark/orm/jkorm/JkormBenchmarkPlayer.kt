@@ -106,7 +106,7 @@ class JkormBenchmarkPlayer : BaseBenchmarkPlayer {
                 .findModel<Department>()
         */
         val dep = Department.findByPk<Department>(i)
-        val emps = dep?.emps
+        val emps = dep?.emps // 主动触发延迟加载
         return 2
     }
 

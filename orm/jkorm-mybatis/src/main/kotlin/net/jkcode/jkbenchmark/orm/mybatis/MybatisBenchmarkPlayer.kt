@@ -114,7 +114,7 @@ class MybatisBenchmarkPlayer : BaseBenchmarkPlayer {
      */
     public fun getDepWithEmps(i: Int): Int {
         val dep = depDao.getDepByIdWithEmps2sql(i)
-        val emps = dep.emps
+        val emps = dep.emps // 主动触发延迟加载
         return 2
     }
 

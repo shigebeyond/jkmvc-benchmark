@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="net.jkcode.jkbenchmark.orm.mybatis.dao.DepartmentDao">
 
-    <insert id="addDep" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee" useGeneratedKeys="true" keyProperty="id">
+    <insert id="addDep" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Department" useGeneratedKeys="true" keyProperty="id">
 		insert into department(title,intro)
 		values(#{title},#{intro})
 	</insert>

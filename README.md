@@ -1,9 +1,11 @@
-# 一、性能测试: jkorm vs jdbc
-主要是对orm框架`jkorm`的查询处理进行性能测试，并与jdbc的查询处理做性能对比。
+# 概述
+针对jkorm框架进行相关的性能测试
+1. 对`jkorm`的不同级别(封装层面不同)的查询api进行性能测试
+2. 针对`jkorm`/`mybatis`2个orm框架进行性能测试
 
-## 测试环境
+# 测试环境
 
-### 硬件配置
+## 硬件配置
 
 一台老的测试机, 机器上还跑着其他服务, 凑合测试
 
@@ -12,7 +14,7 @@
      网络：千兆网卡
      硬盘：900GB
 
-### 软件配置
+## 软件配置
 
      mysql版本： 做db server
      5.6.21
@@ -24,6 +26,9 @@
 
      JVM参数：
      java -Djava.net.preferIPv4Stack=true -server -Xms1g -Xmx1g -XX:PermSize=128m
+
+# 一、性能测试: jkorm vs jdbc
+主要是对orm框架`jkorm`的不同级别的查询api进行性能测试，并与jdbc的查询api做性能对比。
 
 ## 测试脚本(db client)
 
@@ -125,7 +130,7 @@
 
 ## 测试结果
 
-`select action as `测试场景`, requests as `请求数`, run_time as `执行时间(ms)`, tps as `平均tps`, rt as `平均响应时间(ms)` from benchmark_result;`
+> select action as `测试场景`, requests as `请求数`, run_time as `执行时间(ms)`, tps as `平均tps`, rt as `平均响应时间(ms)` from benchmark_result;
 
 ### 场景1: db server/client跑在同一台机器
 
@@ -199,3 +204,345 @@ native > db > queryCompiled > queryReuse > query > orm
 
 # 二、性能测试: jkorm vs mybatis
 主要是对2个orm框架`jkorm`与`mybatis`做性能测试与对比
+
+## 测试脚本
+
+单线程同步调用, 请求数分别为1w/5w/10w的情况下，分别进行如下场景测试, 每种测试进行5轮, 涉及到两个表 department(部门表) 与 employee(员工表)：
+  - add: 新增 - 新增一个部门对象与一个员工对象
+  - update: 更新固定字段 - 根据id先查询后更新单个员工对象, 每次调用固定更新`title`字段
+  - delete: 删除 - 根据id先查询后删除一个员工对象
+  - getDepWithEmps: 联查 - 根据id查询部门对象,并联查部门员工对象,最终执行2条sql
+  - getEmpsByConditionIf: 条件查询 - 根据条件查询员工对象
+  - updateEmpOnDynFields: 更新动态字段 - 区别于update场景, 每次调用轮流更新`title`与`email`字段
+  - getEmpsByIds: 多id查询 - 根据3个随机id来查询员工对象
+
+## 测试代码
+jkorm使用上要比mybatis简单太多, 代码量少很多, 分层少2层, 也没有mapper.xml的啰嗦的语法, 可维护性高很多.
+由于篇幅问题, 代码只列出模型类+`add`/`getDepWithEmps`2类场景的代码, 其他场景看详细代码.
+
+### 模型类代码对比
+1. jkorm的模型类, 对应mybatis的实体类;
+因为jkorm的模型是富血模型, 要配置表名/主键/关联关系, 所以比简单实体类要复杂些;
+下面简单看看 Department 模型类
+```
+/**
+ * 部门
+ *
+ * @author shijianhang<772910474@qq.com>
+ * @date 2021-04-13 14:18:07
+ */
+class Department(vararg pks: Any): Orm(*pks) {
+
+	public constructor() : this(*arrayOf())
+
+	// 伴随对象就是元数据
+ 	companion object m: OrmMeta(Department::class, "部门", "department", DbKeyNames("id")){
+		init {
+			hasMany("emps", Employee::class, "dep_id")
+		}
+	}
+
+	// 代理属性读写
+	public var id:Integer by property() //
+
+	public var title:String by property() //  
+
+	public var intro:String by property() //
+
+	public var emps: List<Employee> by listProperty() // 有多个员工
+
+}
+```
+
+2. mybatis实体类
+```
+public class Department {
+    private Integer id;
+    private String title;
+    private String intro;
+    private List<Employee> emps;
+    ...
+}
+```
+
+### `add`场景代码对比
+相对于jkorm, mybatis多了dao接口跟mapper.xml, 代码量是前者的2倍, 另外由于多了2层代码加上mapper.xml特有的语法, 使得复杂度也增加不少.
+
+1. jkorm
+JkormBenchmarkPlayer.add() -- 入口
+```
+/**
+ * 新增
+ */
+public fun add(i: Int): Int {
+    Department.db.transaction {
+        // 新增部门
+        val dep = Department()
+        dep.id = Integer(i)
+        dep.title = "部" + i
+        dep.intro = ""
+        dep.create()
+
+        // 新增员工
+        val isMan = randomBoolean()
+        val title = (if (isMan) "Mr " else "Miss ") + randomString(5);
+        val gender = if (isMan) "男" else "女";
+        val emp = Employee();
+        emp.id = Integer(i)
+        emp.title = title
+        emp.email = "$title@qq.com"
+        emp.gender = gender
+        emp.depId = dep.id
+        emp.create()
+    }
+
+    return 2
+}
+```
+
+2. mybatis
+
+2.1 MybatisBenchmarkPlayer.add() -- 入口
+```
+/**
+ * 新增
+ */
+public fun add(i: Int): Int {
+    // 新增部门
+    val dep = Department(i, "部" + i, "")
+    depDao.addDep(dep)
+
+    // 新增员工
+    val isMan = randomBoolean()
+    val title = (if (isMan) "Mr " else "Miss ") + randomString(5);
+    val gender = if (isMan) "男" else "女";
+    val emp = Employee(i, title, "$title@qq.com", gender, dep);
+    empDao.addEmp(emp)
+
+    session.commit()
+
+    return 2
+}
+```
+
+2.2 DepartmentDao.addDep() -- 部门对象的dao跟mapper
+dao
+```
+/**
+ * 添加部门
+ * @param dep
+ * @return
+ */
+Long addDep(Department dep);
+```
+
+DepartmentMapper.xml
+```
+<insert id="addDep" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Department" useGeneratedKeys="true" keyProperty="id">
+    insert into department(title,intro)
+    values(#{title},#{intro})
+</insert>
+```
+
+2.3 EmployeeDao.addEmp() -- 员工对象的dao跟mapper
+dao
+```
+/**
+ * 增
+ * @param emp
+ * @return
+ */
+Long addEmp(Employee emp);
+```
+
+EmployeeMapper.xml
+```
+<insert id="addEmp" parameterType="net.jkcode.jkbenchmark.orm.mybatis.model.Employee" useGeneratedKeys="true" keyProperty="id">
+    insert into employee(title,email,gender)
+    values(#{title},#{email},#{gender})
+</insert>
+```
+
+### `getDepWithEmps`场景代码对比
+相对于jkorm, mybatis多了dao接口跟mapper.xml, 代码量是前者的2倍多, 另外由于多了2层代码加上mapper.xml特有的语法, 使得复杂度也增加不少.
+
+1. jkorm
+JkormBenchmarkPlayer.getDepWithEmps() -- 入口
+```
+/**
+ * 部门联查员工
+ */
+public fun getDepWithEmps(i: Int): Int {
+    /*
+    val dep = Department.queryBuilder()
+            .where("id", i)
+            .findModel<Department>()
+    */
+    val dep = Department.findByPk<Department>(i)
+    val emps = dep?.emps // 主动触发延迟加载
+    return 2
+}
+```
+
+2. mybatis
+
+2.1 MybatisBenchmarkPlayer.getDepWithEmps() -- 入口
+```
+/**
+ * 部门联查员工
+ */
+public fun getDepWithEmps(i: Int): Int {
+    val dep = depDao.getDepByIdWithEmps2sql(i)
+    val emps = dep.emps // 主动触发延迟加载
+    return 2
+}
+```
+
+2.2 DepartmentDao.getDepByIdWithEmps2sql() -- 部门对象的dao跟mapper
+dao
+```
+/**
+ * 部门联查员工, 用2条sql
+ * @param id
+ * @return
+ */
+Department getDepByIdWithEmps2sql(Integer id);
+```
+
+DepartmentMapper.xml
+```
+<!-- Department getDepByIdWithEmps2sql(Integer id); -->
+<resultMap id="depCascadeEmps2" type="net.jkcode.jkbenchmark.orm.mybatis.model.Department">
+    <!-- 设置主键映射 -->
+    <id column="id" property="id"/>
+    <!-- 普通字段映射 -->
+    <result column="title" property="title"/>
+    <result column="intro" property="intro"/>
+    <!-- 级联查询员工 -->
+    <collection property="emps"
+                select="net.jkcode.jkbenchmark.orm.mybatis.dao.EmployeeDao.getEmpByDepId"
+                column="id">
+    </collection>
+</resultMap>
+<select id="getDepByIdWithEmps2sql" resultMap="depCascadeEmps2">
+    select *
+    from department
+    where id = #{id}
+</select>
+```
+
+## 测试结果
+
+[结果sql](orm/jkorm-mybatis/result/result.sql)
+
+### 结论先行
+10w请求下的2个维度(tps/rt)的对比汇总
+
+#### tps维度对比
+
+| 测试场景 | jkorm tps | mybatis tps  | 性能排序 | jkorm/mybatis |  最优 |
+|--------|-----------|---------|--------------|--------------|--------------|
+| add | 897.41 | 886.68 | jkorm > mybatis| 101.21 %  | jkorm |
+| update | 884.88 | 871.26 | jkorm > mybatis| 101.56 %  | jkorm |
+| delete | 878.65 | 878.21 | jkorm > mybatis| 100.05 %  | jkorm |
+| getDepWithEmps | 8285.65 | 8466.51 | mybatis > jkorm | 97.86 %  | mybatis |
+| getEmpsByConditionIf | 13310.7 | 12964.26 | jkorm > mybatis| 102.67 %  | jkorm |
+| updateEmpOnDynFields | 879.52 | 867.48 | jkorm > mybatis| 101.39 %  | jkorm |
+| getEmpsByIds | 13876.07 | 12473.92 | jkorm > mybatis| 111.24 %  | jkorm |
+
+=> 得出结论:
+1. `getDepWithEmps`场景下, mybatis 性能略优于 jkorm 
+2. 其他场景下, jkorm 性能皆优于 mybatis
+3. `getEmpsByIds`场景下, jkorm 性能尤为突出, tps相对高出 11.24% 
+
+#### rt(响应时间)维度对比
+
+| 测试场景 | jkorm rt | mybatis rt  | 性能排序 | jkorm/mybatis |  最优 |
+|--------|-----------|---------|--------------|--------------|--------------|
+| add | 1.11 | 1.13 | jkorm > mybatis| 98.23 %  | jkorm |
+| update | 1.13 | 1.16 | jkorm > mybatis| 97.41 %  | jkorm |
+| delete | 1.14 | 1.14 | jkorm = mybatis| 100.00 %  | jkorm |
+| getDepWithEmps | 0.12 | 0.12 | jkorm = mybatis| 100.00 %  | jkorm |
+| getEmpsByConditionIf | 0.07 | 0.08 | jkorm > mybatis| 87.50 %  | jkorm |
+| updateEmpOnDynFields | 1.14 | 1.15 | jkorm > mybatis| 99.13 %  | jkorm |
+| getEmpsByIds | 0.07 | 0.08 | jkorm > mybatis| 87.50 %  | jkorm |
+
+=> 得出结论:
+1. `delete`/`getDepWithEmps`场景下, 两者性能是一样的
+2. 其他场景下, jkorm 性能皆优于 mybatis
+3. `getEmpsByConditionIf`/`getEmpsByIds`场景下, jkorm 性能尤为突出, rt相对降低 12.5%
+
+### 每个场景的性能对比
+x轴是请求数, 分别是1w/5w/10w, 最终的优劣结果以10w级请求对比为准
+
+1. `add` 场景
+
+tps: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/add-tps.png)
+
+rt: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/add-rt.png)
+
+2. `update` 场景
+
+tps: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/update-tps.png)
+
+rt: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/update-rt.png)
+
+3. `delete` 场景
+
+tps: jkorm 跟 mybatis 差不多
+
+![](orm/jkorm-mybatis/result/delete-tps.png)
+
+rt: jkorm 跟 mybatis 是一样的, 10w级请求中响应时间都是1.14ms
+
+![](orm/jkorm-mybatis/result/delete-rt.png)
+
+4. `getDepWithEmps` 场景
+
+tps: mybatis 略优于 jkorm
+
+![](orm/jkorm-mybatis/result/getwith-tps.png)
+
+rt: jkorm 跟 mybatis 是一样的, 10w级请求中响应时间都是1.12ms
+
+![](orm/jkorm-mybatis/result/getwith-rt.png)
+
+5. `getEmpsByConditionIf` 场景
+
+tps: jkorm 优于 mybatis
+
+![](orm/jkorm-mybatis/result/condition-tps.png)
+
+rt: jkorm 优于 mybatis, rt相对降低 12.5%
+
+![](orm/jkorm-mybatis/result/condition-rt.png)
+
+6. `updateEmpOnDynFields` 场景
+
+tps: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/updatedyn-tps.png)
+
+rt: jkorm 略优于 mybatis
+
+![](orm/jkorm-mybatis/result/updatedyn-rt.png)
+
+7. `getEmpsByIds` 场景
+
+tps: jkorm 优于 mybatis, tps相对高出 11.24% 
+
+![](orm/jkorm-mybatis/result/ids-tps.png)
+
+rt: jkorm 优于 mybatis, rt相对降低 12.5%
+
+![](orm/jkorm-mybatis/result/ids-rt.png)
+
+
