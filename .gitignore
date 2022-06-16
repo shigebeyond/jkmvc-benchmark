@@ -8,3 +8,8 @@ logs/
 tmp/
 zookeeper.out
 messages.json
+jkutil
+jkguard
+jphp-java-ext
+jkmvc
+jkbenchmark
