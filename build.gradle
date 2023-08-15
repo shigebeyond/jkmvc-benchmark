@@ -3,10 +3,11 @@ buildscript {
     repositories {
         mavenLocal()
         maven {
-            url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
+            url 'https://maven.aliyun.com/repository/gradle-plugin/'
         }
-        jcenter()
-        mavenCentral()
+        maven {
+            url 'https://maven.aliyun.com/repository/public/' // 等价central+jcenter
+        }
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
@@ -59,9 +60,8 @@ subprojects{
     repositories {
         mavenLocal()
         maven {
-            url 'http://maven.aliyun.com/nexus/content/repositories/snapshots'
+            url 'https://maven.aliyun.com/repository/public/' // 等价central+jcenter
         }
-        mavenCentral()
         maven {
             url "http://dl.bintray.com/kotlin/kotlin"
         }
